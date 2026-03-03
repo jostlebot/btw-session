@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BTW Session MVP</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f8f9fa;
+      color: #333;
+      line-height: 1.6;
+    }
+    header {
+      background: linear-gradient(135deg, #5a7d6a 0%, #4a6b5a 100%);
+      color: white;
+      padding: 1.5rem 2rem;
+      text-align: center;
+    }
+    header h1 { font-size: 1.5rem; font-weight: 600; }
+    header p { opacity: 0.85; font-size: 0.9rem; margin-top: 0.25rem; }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      background: white;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .tab {
+      padding: 0.75rem 1.25rem;
+      border: none;
+      background: #f0f0f0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .tab:hover { background: #e0e0e0; }
+    .tab.active {
+      background: #5a7d6a;
+      color: white;
+    }
+
+    .content { padding: 2rem; max-width: 900px; margin: 0 auto; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .card h3 {
+      color: #5a7d6a;
+      margin-bottom: 0.75rem;
+      font-size: 1.1rem;
+    }
+
+    .roles {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin: 1.5rem 0;
+    }
+    .role {
+      text-align: center;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 10px;
+      flex: 1;
+      max-width: 150px;
+    }
+    .role-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin: 0 auto 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    .role-icon.therapist { background: #e8f0eb; }
+    .role-icon.ai { background: #ede8f5; }
+    .role-icon.client { background: #e8f4f8; }
+    .role span { font-size: 0.8rem; color: #666; }
+
+    .slider-group { margin: 1rem 0; }
+    .slider-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 0.5rem;
+    }
+    .slider-group input[type="range"] {
+      width: 100%;
+      accent-color: #5a7d6a;
+    }
+
+    .guardrail {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+    }
+    .guardrail-icon { font-size: 1.2rem; }
+    .guardrail span { font-size: 0.9rem; }
+
+    .chat-demo {
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .chat-header {
+      background: #f8f9fa;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
+      color: #666;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .chat-messages { padding: 1rem; max-height: 300px; overflow-y: auto; }
+    .message {
+      margin-bottom: 1rem;
+      max-width: 80%;
+    }
+    .message.user {
+      margin-left: auto;
+      text-align: right;
+    }
+    .message p {
+      display: inline-block;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+    }
+    .message.user p { background: #5a7d6a; color: white; }
+    .message.ai p { background: #f0f0f0; }
+    .message small {
+      display: block;
+      font-size: 0.7rem;
+      color: #999;
+      margin-top: 0.25rem;
+    }
+
+    .scenario-btns {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .scenario-btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid #5a7d6a;
+      background: white;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .scenario-btn:hover, .scenario-btn.active {
+      background: #5a7d6a;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>BTW Session MVP</h1>
+    <p>Bridge to Agential Care</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" onclick="showPanel('triadic')">Triadic Alliance</button>
+    <button class="tab" onclick="showPanel('standalone')">Standalone Agent</button>
+    <button class="tab" onclick="showPanel('relational')">Relational Lab</button>
+  </nav>
+
+  <main class="content">
+    <!-- Panel 1: Triadic Alliance -->
+    <div id="triadic" class="panel active">
+      <div class="card">
+        <h3>Collaborative Therapy Model</h3>
+        <p>Three-way partnership between clinician, AI, and client.</p>
+
+        <div class="roles">
+          <div class="role">
+            <div class="role-icon therapist">👤</div>
+            <strong>Therapist</strong>
+            <span>Sets boundaries</span>
+          </div>
+          <div class="role">
+            <div class="role-icon ai">🤖</div>
+            <strong>AI Agent</strong>
+            <span>Supports & adapts</span>
+          </div>
+          <div class="role">
+            <div class="role-icon client">👤</div>
+            <strong>Client</strong>
+            <span>Guides preferences</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Session Parameters</h3>
+        <div class="slider-group">
+          <label>AI Autonomy Level</label>
+          <input type="range" min="0" max="100" value="50">
+        </div>
+        <div class="slider-group">
+          <label>Check-in Frequency</label>
+          <input type="range" min="0" max="100" value="70">
+        </div>
+        <div class="slider-group">
+          <label>Proactive Prompts</label>
+          <input type="range" min="0" max="100" value="30">
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 2: Standalone Agent -->
+    <div id="standalone" class="panel">
+      <div class="card">
+        <h3>Built-in Guardrails</h3>
+        <div class="guardrail">
+          <span class="guardrail-icon">🔍</span>
+          <span><strong>Transparency</strong> — Always discloses AI nature</span>
+        </div>
+        <div class="guardrail">
+          <span class="guardrail-icon">🚧</span>
+          <span><strong>Scope Limits</strong> — Stays within defined boundaries</span>
+        </div>
+        <div class="guardrail">
+          <span class="guardrail-icon">🚨</span>
+          <span><strong>Escalation</strong> — Connects to humans when needed</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Functional Scope</h3>
+        <p style="margin-bottom: 0.75rem; font-size: 0.9rem; color: #666;">What the agent can and cannot do:</p>
+        <div class="guardrail" style="border-left: 3px solid #4CAF50;">
+          <span>✅ Reflective listening, psychoeducation, coping tools</span>
+        </div>
+        <div class="guardrail" style="border-left: 3px solid #FF9800;">
+          <span>⚠️ Goal-setting, homework (requires consent)</span>
+        </div>
+        <div class="guardrail" style="border-left: 3px solid #f44336;">
+          <span>🚫 Diagnosis, medication advice, crisis intervention</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 3: Relational Lab -->
+    <div id="relational" class="panel">
+      <div class="card">
+        <h3>Attachment-Aware Responses</h3>
+        <p style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">AI adapts based on relational patterns.</p>
+
+        <div class="scenario-btns">
+          <button class="scenario-btn active" onclick="loadScenario('anxious')">Anxious Style</button>
+          <button class="scenario-btn" onclick="loadScenario('secure')">Secure Style</button>
+          <button class="scenario-btn" onclick="loadScenario('avoidant')">Avoidant Style</button>
+        </div>
+
+        <div class="chat-demo">
+          <div class="chat-header">Demo Conversation</div>
+          <div class="chat-messages" id="chat-messages">
+            <div class="message user">
+              <p>I'm worried you'll think I'm being too needy...</p>
+            </div>
+            <div class="message ai">
+              <p>It's completely okay to reach out. Your needs are valid, and I'm here to support you without any judgment.</p>
+              <small>Strategy: Reassurance + Validation</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function showPanel(id) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    const scenarios = {
+      anxious: {
+        user: "I'm worried you'll think I'm being too needy...",
+        ai: "It's completely okay to reach out. Your needs are valid, and I'm here to support you without any judgment.",
+        strategy: "Reassurance + Validation"
+      },
+      secure: {
+        user: "I wanted to check in about something on my mind.",
+        ai: "I'm glad you're here. What would you like to explore together?",
+        strategy: "Open Invitation + Presence"
+      },
+      avoidant: {
+        user: "I guess I should probably talk about this...",
+        ai: "Take your time. There's no pressure here — we can go at whatever pace feels right for you.",
+        strategy: "Space-Holding + Low Pressure"
+      }
+    };
+
+    function loadScenario(type) {
+      document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      const s = scenarios[type];
+      document.getElementById('chat-messages').innerHTML = `
+        <div class="message user"><p>${s.user}</p></div>
+        <div class="message ai">
+          <p>${s.ai}</p>
+          <small>Strategy: ${s.strategy}</small>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
